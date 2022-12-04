@@ -23,6 +23,33 @@ pub fn solve_part1(input: &str) -> u32 {
     priorities
 }
 
+#[aoc(day3, part2)]
+pub fn solve_part2(input: &str) -> u32 {
+    let mut sacks = input.split("\n").peekable();
+    let mut groups = vec![];
+    while sacks.peek().is_some() {
+        let chunk: Vec<_> = sacks.by_ref().take(3).collect();
+
+        groups.push(chunk);
+    }
+
+    groups
+        .iter()
+        .map(|group| {
+            let item = group[0].chars().find(|element| {
+                group[1].chars().any(|el| el == *element)
+                    && group[2].chars().any(|el| el == *element)
+            });
+
+            if let Some(priority) = item {
+                to_priority(priority)
+            } else {
+                0
+            }
+        })
+        .sum()
+}
+
 fn to_priority(i: char) -> u32 {
     let raw = i as u32;
 
@@ -46,6 +73,17 @@ wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw";
         assert_eq!(157, solve_part1(input));
+    }
+
+    #[test]
+    fn test_day3_part2() {
+        let input = "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw";
+        assert_eq!(70, solve_part2(input));
     }
 
     #[test]
