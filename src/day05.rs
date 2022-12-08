@@ -52,8 +52,20 @@ impl Stack {
         self.crates.pop()
     }
 
+    fn split_off(&mut self, at: u32) -> Vec<char> {
+        self.crates.split_off(at as usize)
+    }
+
+    fn append(&mut self, crates: &mut Vec<char>) {
+        self.crates.append(crates)
+    }
+
     fn top(&self) -> char {
         *self.crates.last().unwrap_or(&'\0')
+    }
+
+    fn len(&self) -> u32 {
+        self.crates.len() as u32
     }
 }
 
@@ -73,6 +85,18 @@ impl Cargo {
                 let end_stack = &mut self.stacks[(end - 1) as usize];
                 end_stack.push(el);
             }
+        }
+    }
+
+    fn apply_9001(&mut self, steps: Vec<Step>) {
+        for step in steps {
+            let Step(size, start, end) = step;
+
+            let split_at = self.stacks[(start - 1) as usize].len() - size;
+            let start_stack = &mut self.stacks[(start - 1) as usize];
+            let mut els = start_stack.split_off(split_at);
+            let end_stack = &mut self.stacks[(end - 1) as usize];
+            end_stack.append(&mut els);
         }
     }
 
@@ -131,6 +155,19 @@ pub fn solve_part1(input: &str) -> String {
     cargo.tops()
 }
 
+#[aoc(day5, part2)]
+pub fn solve_part2(input: &str) -> String {
+    let parts: Vec<&str> = input.split("\n\n").collect();
+    let mut cargo = Cargo::from_str(parts[0]).unwrap();
+    let steps: Vec<Step> = parts[1]
+        .split("\n")
+        .map(|line| Step::from_str(line).unwrap())
+        .collect();
+
+    cargo.apply_9001(steps);
+    cargo.tops()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,6 +185,21 @@ move 2 from 2 to 1
 move 1 from 1 to 2";
 
         assert_eq!(solve_part1(input), "CMZ");
+    }
+
+    #[test]
+    fn test_day5_part2() {
+        let input = "    [D]    
+[N] [C]    
+[Z] [M] [P]
+ 1   2   3 
+
+move 1 from 2 to 1
+move 3 from 1 to 3
+move 2 from 2 to 1
+move 1 from 1 to 2";
+
+        assert_eq!(solve_part2(input), "MCD");
     }
 
     #[test]
